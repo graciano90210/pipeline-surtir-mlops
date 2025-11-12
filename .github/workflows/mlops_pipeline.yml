@@ -1,0 +1,38 @@
+name: Pipeline MLOps Surtir SAS
+
+# ¿Cuándo se activa? Cada vez que empujamos código (push)
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  entrenamiento-automatico:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. El robot descarga tu código
+    - name: Chequear código del repositorio
+      uses: actions/checkout@v3
+
+    # 2. El robot instala Python
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    # 3. El robot instala las librerías
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # 4. ¡El robot ejecuta tu Pipeline!
+    - name: Generar Datos, Entrenar y Subir Modelo
+      env:
+        # Aquí el robot lee el secreto que guardamos
+        AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      run: |
+        echo "🚀 Iniciando Pipeline Automático..."
+        python generate_data.py
+        python train_model.py
+        echo "✅ Pipeline finalizado con éxito."
